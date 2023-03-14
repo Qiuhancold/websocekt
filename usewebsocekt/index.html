@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>猪猫的聊天室</title>
+
+    <style>
+      .content {
+        /* background-color: skyblue;
+        height: 200px;
+        width: 200px; */
+      }
+    </style>
+  </head>
+  <body>
+    <input type="text" placeholder="请输入你的内容" />
+    <button>发送</button>
+    <div class="content"></div>
+    <script>
+      const TYPE_ENTER = 0 //表示进入聊天室的消息
+      const TYPE_LEAVE = 1 //用户离开聊天室的消息
+      const TYPE_MSG = 2 //正常的聊天消息
+      var input = document.querySelector('input')
+      var button = document.querySelector('button')
+      var div = document.querySelector('div')
+      // const WebSocket = require('ws')
+      var socket = new WebSocket('ws://localhost:3001')
+      // var socket = new WebSocket('ws://echo.websocket.org')
+      // websocket连接成功时触发
+      socket.addEventListener('open', function () {
+        div.innerHTML = '连接服务成功'
+      })
+      // 3.发消息给websocketc
+
+      button.addEventListener('click', function () {
+        var value = input.value
+        socket.send(value)
+        input.value = ''
+      })
+      // 4.接受websocket服务器的数据
+      socket.addEventListener('message', function (e) {
+        console.log(e.data)
+        var data = JSON.parse(e.data)
+        var de = document.createElement('div')
+        if (data.type === TYPE_ENTER) {
+          // 0 //表示进入聊天室的消息
+          de.style.color = 'green'
+        } else if (data.type === TYPE_LEAVE) {
+          // 用户离开聊天室的消息
+          de.style.color = 'red'
+        } else if (data.type === TYPE_MSG) {
+          // 正常的聊天消息
+          de.style.color = 'skyblue'
+        }
+        de.innerHTML = `${data.msg} --------  ${data.time}`
+        div.appendChild(de)
+      })
+      // 4.接受websocket服务器的数据
+      socket.addEventListener('close', function () {
+        div.innerHTML = '服务器断开连接'
+      })
+    </script>
+  </body>
+</html>
